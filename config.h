@@ -38,6 +38,7 @@
 #define SYS_BEAGLE		4
 #define SYS_WII			5
 #define SYS_PS3			6
+#define SYS_PS2			7
 
 //host endian
 #define ENDIAN_LITTLE	1
@@ -56,6 +57,7 @@
 #define REND_GLES2  2
 #define REND_SOFT   3   // Or .. something [ null atm ]
 #define REND_WII	4
+#define REND_PS2	5
 
 
 // Add defs to IDE/makefile whatever as _cpuname, _osname
@@ -125,6 +127,14 @@
 	#define HOST_SYS SYS_PSP
 	#define REND_API REND_PSP
 	#define VER_TARGET "psp"
+#endif
+
+#ifdef _PS2
+	#define _MIPS
+	#define HOST_CPU CPU_MIPS_5900
+	#define HOST_SYS SYS_PS2
+	#define REND_API REND_PS2
+	#define VER_TARGET "ps2"
 #endif
 
 #ifdef _PS3

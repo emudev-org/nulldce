@@ -43,6 +43,8 @@ void SaveSettings();
 	#define REND_NAME "Software"
 #elif REND_API == REND_WII
 	#define REND_NAME "WIIgx DHA"
+#elif REND_API == REND_PS2
+	#define REND_NAME "PS2gs DHA"
 #else
 	#error invalid config.REND_API must be set with one of REND_D3D/REND_OGL/REND_SW/REND_D3D_V2
 #endif

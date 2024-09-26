@@ -12,7 +12,7 @@ s32 spg_ScanlineSh4CycleCounter;
 u32 spg_ScanlineCount=512;
 u32 spg_CurrentScanline=-1;
 u32 spg_VblankCount=0;
-u32 spg_LineSh4Cycles=0;
+s32 spg_LineSh4Cycles=0;
 u32 spg_FrameSh4Cycles=0;
 
 

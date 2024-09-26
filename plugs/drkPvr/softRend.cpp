@@ -89,9 +89,9 @@ struct
 	//Data
 	struct
 	{
-		Vertex ALIGN16  vertices[42*1024];
-		VertexList  ALIGN16 lists[8*1024];
-		PolyParam  ALIGN16 pparams[8*1024];
+		Vertex ALIGN16  vertices[4*1024];
+		VertexList  ALIGN16 lists[1*1024];
+		PolyParam  ALIGN16 pparams[1*1024];
 		float vtx_min_Z;
 		float vtx_max_Z;
 

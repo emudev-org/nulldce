@@ -40,7 +40,7 @@ void Sh4_int_Run()
 	{
 		do
 		{
-			u32 op=ReadMem16(next_pc);		
+			u32 op=ReadMem16(next_pc);
 			next_pc+=2;
 
 			OpPtr[op](op);

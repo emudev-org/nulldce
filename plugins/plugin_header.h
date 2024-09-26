@@ -1,5 +1,7 @@
 #pragma once
 #include "config.h"
+#include <cstddef>
+
 #define _PLUGIN_HEADER_
 
 #if HOST_OS==OS_PSP
@@ -16,7 +18,6 @@
 	#define FASTCALL
 	#define fastcall
 	void __debugbreak();
-	int rename ( const char * oldname, const char * newname );
 	#include <tamtypes.h>
 #elif HOST_OS==OS_LINUX
 	#include "linux/typedefs.h"

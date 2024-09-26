@@ -242,7 +242,8 @@ u32 INLINE BSR(u32 v)
              :"r"(v)         /* input */
 			 );
 	 return 31-rv;
-#elif (HOST_CPU==CPU_MIPS_5900)
+#elif (HOST_CPU==CPU_MIPS_5900) && 0
+#error TODO thiss
 	u32 rv;
 	 asm ("PLZCW %0,%1"
              :"=r"(rv)        /* output */

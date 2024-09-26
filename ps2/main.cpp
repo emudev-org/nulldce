@@ -4,15 +4,18 @@
 #include "dc/sh4/sh4_opcode_list.h"
 #include "stdclass.h"
 #include "dc/dc.h"
-#include "gui/base.h"
 #include "config/config.h"
 #include "plugins/plugin_manager.h"
-#include "serial_ipc/serial_ipc_client.h"
 #include "cl/cl.h"
+#include <chrono>
+
+
 #undef r
 #undef fr
 
 void __debugbreak() { fflush(stdout); *(int*)0=1;}
+
+void SetApplicationPath(wchar* path);
 
 int main(int argc, wchar* argv[])
 {
@@ -30,4 +33,25 @@ int main(int argc, wchar* argv[])
 	int rv=EmuMain(argc,argv);
 
 	return rv;
+}
+
+
+int os_GetFile(char *szFileName, char *szParse,u32 flags)
+{
+	// strcpy(szFileName, "/Users/skmp/projects/nullDCe/ps2/boot.gdi");
+	return 0;
+}
+
+int os_msgbox(const wchar* text,unsigned int type)
+{
+	printf("OS_MSGBOX: %s\n",text);
+	return 0;
+}
+
+double os_GetSeconds()
+{
+	auto now = std::chrono::system_clock::now();
+    std::chrono::duration<double> duration = now.time_since_epoch();
+
+	return duration.count();
 }

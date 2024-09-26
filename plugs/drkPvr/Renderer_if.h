@@ -6,6 +6,7 @@
 extern u32 VertexCount;
 extern u32 FrameCount;
 
+#include "gsRend.h"
 #include "gxRend.h"
 #include "nullRend.h"
 #include "glesRend.h"

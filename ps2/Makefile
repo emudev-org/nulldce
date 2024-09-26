@@ -8,6 +8,9 @@ OBJS = \
  ../dc/gdrom/gdromv3.o \
  ../dc/gdrom/gdrom_response.o \
  ../dc/maple/maple_if.o \
+ ../dc/maple/maple_helper.o \
+ ../dc/maple/maple_cfg.o \
+ ../dc/maple/maple_devs.o \
  ../dc/mem/memutil.o \
  ../dc/mem/mmu.o \
  ../dc/mem/sb.o \
@@ -37,11 +40,9 @@ OBJS = \
  ../dc/sh4/rec_v2/blockmanager.o \
  ../dc/sh4/rec_v2/driver.o \
  ../dc/sh4/rec_v2/decoder.o \
- ../gui/base.o \
  ../nullDC.o \
  ../plugins/plugin_manager.o \
  ../plugins/plugin_types.o \
- ../profiler/profiler.o \
  ../stdclass.o \
  ../plugs/nullExtDev/nullExtDev.o \
  ../plugs/drkMapleDevices/drkMapleDevices.o \
@@ -54,29 +55,28 @@ OBJS = \
  ../plugs/ImgReader/iso9660.o \
  ../plugs/ImgReader/mds.o \
  ../plugs/ImgReader/mds_reader.o \
- ../plugs/gui/libgui.o \
  ../plugs/drkPvr/drkPvr.o \
  ../plugs/drkPvr/regs.o \
  ../plugs/drkPvr/nullRend.o \
  ../plugs/drkPvr/Renderer_if.o \
  ../plugs/drkPvr/SPG.o \
- ../plugs/drkPvr/softRend.o \
+ ../plugs/drkPvr/gsRend.o \
  ../plugs/drkPvr/ta.o \
  
 
 EE_INCS = -I../
-EE_CFLAGS = -O2 -G 0
+EE_CFLAGS = -Os -G 0
 EE_CFLAGS += -mno-gpopt
 EE_CFLAGS += -Wall
-EE_CFLAGS += -frename-registers -fno-strict-aliasing -fsingle-precision-constant -fomit-frame-pointer -ffast-math
-EE_CFLAGS += -DRELEASE -w
+EE_CFLAGS += -frename-registers -fno-strict-aliasing -fsingle-precision-constant -fomit-frame-pointer -ffast-math -ffunction-sections -fdata-sections
+EE_CFLAGS += -DRELEASE -w  -flto
 EE_CXXFLAGS = $(EE_CFLAGS) -fno-exceptions -fno-rtti -D _PS2 -D _MIPS -w 
 EE_ASFLAGS = -c -x assembler-with-cpp
 
 EE_BIN = nullDC.elf
 EE_OBJS = main.o
 EE_OBJS += $(OBJS)
-EE_LIBS =  -lm -lc -lstdc++ -lsupc++
+EE_LIBS = -flto -Wl,--gc-sections -lm -lc -lstdc++ -ldraw -lgraph -lpacket -ldma
 
 all: $(EE_BIN)
 

@@ -167,6 +167,7 @@ void* _vmem_read_const(u32 addr,bool& ismem,u32 sz)
 	else
 	{
 		ismem=true;
+		iirf &= HANDLER_MAX;
 		addr<<=iirf;
 		addr>>=iirf;
 		#if HOST_ENDIAN==ENDIAN_BIG
@@ -217,6 +218,7 @@ INLINE T fastcall _vmem_readt(u32 addr)
 	}
 	else
 	{
+		iirf &= HANDLER_MAX;
 		addr<<=iirf;
 		addr>>=iirf;
 		#if HOST_ENDIAN==ENDIAN_BIG
@@ -262,6 +264,7 @@ INLINE void fastcall _vmem_writet(u32 addr,T data)
 	}
 	else
 	{
+		iirf &= HANDLER_MAX;
 		addr<<=iirf;
 		addr>>=iirf;
 #if HOST_ENDIAN==ENDIAN_BIG
