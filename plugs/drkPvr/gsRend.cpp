@@ -38,10 +38,16 @@ using namespace TASplitter;
 
 struct Vertex
 {
-	float u,v;
-    unsigned int col;
-    float x, y, z;
+	u32 col;
+	f32 q;
+	f32 u;
+	f32 v;
+	u16 x;
+	u16 y;
+	u32 z;
 };
+
+static_assert(sizeof(Vertex) == 3 * 8, "Vertex size mismatch");
 
 struct VertexList
 {
@@ -138,9 +144,9 @@ float vtx_max_Z;
 		//Offset Col
 
 		//XYZ are _allways_ there :)
-		cv->x=vrf(ptr);ptr+=4;
-		cv->y=vrf(ptr);ptr+=4;
-		cv->z=vrf(ptr);ptr+=4;
+		cv->x=vrf(ptr)*16;ptr+=4;
+		cv->y=vrf(ptr)*16;ptr+=4;
+		cv->z=vrf(ptr)*16;ptr+=4;
 
 		if (isp.Texture)
 		{	//Do texture , if any
@@ -973,6 +979,10 @@ float vtx_max_Z;
 
 	packet_t *packets[2];
 
+	xyz_t *xyz;
+	color_t *rgbaq;
+	texel_t *st;
+
 	void DoRender()
 	{
 		float dc_width,dc_height;
@@ -1079,19 +1089,38 @@ float vtx_max_Z;
 		// guMtxIdentity(modelview);
 		// GX_LoadPosMtxImm(modelview,GX_PNMTX0);
 		packet_t *current = packets[context];
-		
+
 		auto q = current->data;
 
 		// Clear framebuffer but don't update zbuffer.
 		q = draw_disable_tests(q,0,&z);
-		q = draw_clear(q,0,2048.0f-320.0f,2048.0f-256.0f,dc_width,dc_height,0x40,0x40,0x40);
-		q = draw_enable_tests(q,0,&z);
+		q = draw_clear(q,0,0,0,dc_width,dc_height,0x40,0x40,0x40);
+		// q = draw_enable_tests(q,0,&z);
 
 		Vertex* drawVTX=vertices;
 		VertexList* drawLST=lists;
 		PolyParam* drawMod=listModes;
 
 		const VertexList* const crLST=curLST;//hint to the compiler that sceGUM cant edit this value !
+
+		prim_t prim;
+
+		prim.type = PRIM_TRIANGLE_STRIP;
+		prim.shading = PRIM_SHADE_GOURAUD;
+		prim.mapping = DRAW_DISABLE;
+		prim.fogging = DRAW_DISABLE;
+		prim.blending = DRAW_DISABLE;
+		prim.antialiasing = DRAW_DISABLE;
+		prim.mapping_type = PRIM_MAP_ST;
+		prim.colorfix = PRIM_UNFIXED;
+
+		color_t color;
+
+		color.r = 0x80;
+		color.g = 0x80;
+		color.b = 0x80;
+		color.a = 0xFF;
+		color.q = 1.0f;
 
 // 		GX_SetBlendMode(GX_BM_NONE, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 
@@ -1129,20 +1158,26 @@ float vtx_max_Z;
 
 			if (count)
 			{
-				// GX_Begin(GX_TRIANGLESTRIP,GX_VTXFMT0,count);
-				while(count--)
+				auto dw = (u64*)draw_prim_start(q,0,&prim, &color);
+
+				// auto col = (u32)drawVTX;
+				// for (int i = 0; i < count; i++)
+				// {
+				// 	drawVTX[i].col = col * 1337 + 1;
+				// }
+
+				memcpy(dw, drawVTX, count * sizeof(Vertex));
+				(unat&)dw += count * sizeof(Vertex);
+				drawVTX+=count;
+
+				if ((unat)dw % 16)
 				{
-					// GX_Position3f32(drawVTX->x,drawVTX->y,-drawVTX->z);
-					// GX_Color1u32(HOST_TO_LE32(drawVTX->col));
-					// GX_TexCoord2f32(drawVTX->u,drawVTX->v);
-					drawVTX++;
+					*dw++ = 0;
 				}
-				// GX_End();
+
+				// Only 3 registers rgbaq/st/xyz were used (standard STQ reglist)
+				q = draw_prim_end((qword_t*)dw,3,DRAW_STQ_REGLIST);
 			}
-
-			//sceGuDrawArray(GU_TRIANGLE_STRIP,GU_TEXTURE_32BITF|GU_COLOR_8888|GU_VERTEX_32BITF|GU_TRANSFORM_3D,count,0,drawVTX);
-
-//			drawVTX+=count;
 		}
 
 		reset_vtx_state();
@@ -1221,7 +1256,7 @@ float vtx_max_Z;
 		q = draw_setup_environment(q,0,frame,z);
 
 		// Now reset the primitive origin to 2048-width/2,2048-height/2.
-		q = draw_primitive_xyoffset(q,0,(2048-320),(2048-256));
+		q = draw_primitive_xyoffset(q,0,0,0);
 
 		// Finish setting up the environment.
 		q = draw_finish(q);
@@ -1345,14 +1380,10 @@ float vtx_max_Z;
 		}
 
 #define vert_base(dst,_x,_y,_z) /*VertexCount++;*/ \
-		float W=1.0f/_z; \
-		curVTX[dst].x=VTX_TFX(_x)*W; \
-		curVTX[dst].y=VTX_TFY(_y)*W; \
-		if (W<vtx_min_Z)	\
-			vtx_min_Z=W;	\
-		else if (W>vtx_max_Z)	\
-			vtx_max_Z=W;	\
-		curVTX[dst].z=W; /*Linearly scaled later*/
+		curVTX[dst].x=VTX_TFX(_x) * 16; \
+		curVTX[dst].y=VTX_TFY(_y) * 16; \
+		curVTX[dst].z=0; /*Linearly scaled later*/ \
+		curVTX[dst].q=1.0f;
 
 		//Poly Vertex handlers
 #define vert_cvt_base vert_base(0,vtx->xyz[0],vtx->xyz[1],vtx->xyz[2])
@@ -1709,8 +1740,12 @@ float vtx_max_Z;
 		// Init the drawing environment and framebuffer.
 		init_drawing_environment(&frame,&z);
 
-		packets[0] = packet_init(100,PACKET_NORMAL);
-		packets[1] = packet_init(100,PACKET_NORMAL);
+		packets[0] = packet_init(8192,PACKET_NORMAL);
+		packets[1] = packet_init(8192,PACKET_NORMAL);
+
+		xyz   = (xyz_t*) memalign(128, sizeof(u64) * 4096);
+		rgbaq = (color_t*) memalign(128, sizeof(u64) * 4096);
+		st    = (texel_t*)memalign(128, sizeof(u64) * 4096);
 
 		return TileAccel.Init();
 	}
