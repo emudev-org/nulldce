@@ -1144,7 +1144,6 @@ float vtx_max_Z;
 			{
 				if (drawMod->pcw.Texture)
 				{
-
 					SetTextureParams(drawMod);
 				}
 				else

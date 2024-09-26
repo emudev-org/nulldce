@@ -419,6 +419,35 @@ void UpdateInputState(u32 port)
 		if (pressed&WPAD_BUTTON_RIGHT || pad_stickx > 20)
 			kcode[port]&=~key_CONT_DPAD_RIGHT;
 	}
+#elif HOST_OS == OS_PS2
+#include "libpad.h"
+void UpdateInputState(u32 port)
+{
+	padButtonStatus buttons;
+	if(padRead(0, 0, &buttons)) {
+		kcode[port]=0xFFFF;
+		if (buttons.btns & PAD_CROSS)
+			kcode[port]&=~key_CONT_A;
+		if (buttons.btns & PAD_CIRCLE)
+			kcode[port]&=~key_CONT_B;
+		if (buttons.btns & PAD_TRIANGLE)
+			kcode[port]&=~key_CONT_Y;
+		if (buttons.btns & PAD_SQUARE)
+			kcode[port]&=~key_CONT_X;
+
+		if (buttons.btns & PAD_START)
+			kcode[port]&=~key_CONT_START;
+
+		if (buttons.btns & PAD_UP)
+			kcode[port]&=~key_CONT_DPAD_UP;
+		if (buttons.btns & PAD_DOWN)
+			kcode[port]&=~key_CONT_DPAD_DOWN;
+		if (buttons.btns & PAD_LEFT)
+			kcode[port]&=~key_CONT_DPAD_LEFT;
+		if (buttons.btns & PAD_RIGHT)
+			kcode[port]&=~key_CONT_DPAD_RIGHT;
+	}
+}
 #elif HOST_OS == OS_PS3 && defined(CELL_SDK)
 #include <cell/pad/libpad.h>
 #include <cell/pad/error.h>

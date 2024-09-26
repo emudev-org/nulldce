@@ -76,7 +76,7 @@ EE_ASFLAGS = -c -x assembler-with-cpp
 EE_BIN = nullDC.elf
 EE_OBJS = main.o
 EE_OBJS += $(OBJS)
-EE_LIBS = -flto -Wl,--gc-sections -lm -lc -lstdc++ -ldraw -lgraph -lpacket -ldma
+EE_LIBS = -flto -Wl,--gc-sections -lm -lc -lstdc++ -ldraw -lgraph -lpacket -ldma -lpad
 
 all: $(EE_BIN)
 
