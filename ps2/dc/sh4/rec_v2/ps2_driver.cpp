@@ -152,7 +152,7 @@ void emit_mpop(u32 n, ...)
         else
             emit_lwc1(reg-reg_fpr,psp_sp,u16(4*i));
 #else
-        emit_lw(reg,psp_sp,u16(8*i));
+        emit_lq(reg,psp_sp,u16(8*i));
 #endif
     }
     va_end(ap);
