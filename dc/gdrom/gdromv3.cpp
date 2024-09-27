@@ -81,7 +81,7 @@ struct
 {
 	u32 cache_index;
 	u32 cache_size;
-	u8 cache[2352*32];	//up to 32 sectors
+	u8 cache[2352*2];	//up to 32 sectors
 } read_buff;
 
 //pio buffer
@@ -195,8 +195,8 @@ void FillReadBuffer()
 {
 	read_buff.cache_index=0;
 	u32 count = read_params.remaining_sectors;
-	if (count>32)
-		count=32;
+	if (count>2)
+		count=2;
 
 	read_buff.cache_size=count*read_params.sector_type;
 

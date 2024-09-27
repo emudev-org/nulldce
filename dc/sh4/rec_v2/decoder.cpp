@@ -561,7 +561,7 @@ bool dec_generic(u32 op)
 	if (op>=0xF000)
 	{
 		state.info.has_fpu=true;
-		//return false;//fpu off for now
+		return false;//fpu off for now
 		if (state.cpu.FPR64 /*|| state.cpu.FSZ64*/)
 			return false;
 
@@ -805,6 +805,7 @@ DecodedBlock* dec_DecodeBlock(u32 startpc,fpscr_type fpu_cfg,u32 max_cycles)
 					else
 						block.cycles+=CPU_RATIO;
 
+					// printf("Opcode %02X (%s) at %08X\n",op, OpDesc[op]->diss,state.cpu.rpc);
 					if (state.ngen.OnlyDynamicEnds || !OpDesc[op]->rec_oph)
 					{
 						if (state.ngen.InterpreterFallback || !dec_generic(op))

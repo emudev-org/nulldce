@@ -2,27 +2,27 @@
 #define HALF_VFPU 0
 
 #include "types.h"
-#include "dc\sh4\sh4_opcode_list.h"
+#include "dc/sh4/sh4_opcode_list.h"
 
-#include "dc\sh4\sh4_registers.h"
-#include "dc\sh4\ccn.h"
-#include "dc\sh4\rec_v2\ngen.h"
-#include "dc\mem\sh4_mem.h"
-#include "psp\psp_emit.h"
-void __debugbreak() { fflush(stdout); *(int*)0=1;}
+#include "dc/sh4/sh4_registers.h"
+#include "dc/sh4/ccn.h"
+#include "dc/sh4/rec_v2/ngen.h"
+#include "dc/mem/sh4_mem.h"
+#include "ps2/ps2_emit.h"
+#include <math.h>
 
 void make_address_range_executable(u32 address_start, u32 address_end)
 {
 	address_start = (address_start + 0) & -64;
 	address_end   = (address_end   +63) & -64;
 
-	for (; address_start < address_end; address_start += 64)
-	{
-		__builtin_allegrex_cache(0x1a, address_start);
-		__builtin_allegrex_cache(0x1a, address_start);
-		__builtin_allegrex_cache(0x08, address_start);
-		__builtin_allegrex_cache(0x08, address_start);
-	}
+	unsigned long cache_op_flush_dcache = 0x19; // Operation code for "Hit write-back invalidate data cache"
+	unsigned long cache_op_invalidate_icache = 0x10; // Operation code for "Hit invalidate instruction cache"
+
+    for (auto p = address_start; p < address_end; p += 64) { // 64 bytes per cache line
+        __asm__ volatile("cache %0, 0(%1)" : : "i"(cache_op_flush_dcache), "r"(p));
+		__asm__ volatile("cache %0, 0(%1)" : : "i"(cache_op_invalidate_icache), "r"(p));
+    }
 }
 
 #if 1
@@ -113,7 +113,7 @@ u32* GetRegPtr(u32 reg)
 	a0 - next pc
 */
 const psp_gpr_t psp_ctx_reg = psp_gp;
-const psp_gpr_t psp_cycle_reg = psp_k0;
+const psp_gpr_t psp_cycle_reg = psp_s0;
 const psp_gpr_t psp_bRun_reg = psp_s2;
 const psp_gpr_t psp_next_pc_reg = psp_a0;
 
@@ -656,6 +656,7 @@ void r_fdiv(f32* fn,f32* fm)	{ *fn /= *fm;	}
 u32 r_fcmp_gt(f32* fn,f32* fm)	{ return *fn > *fm ? 1:0; }
 u32 r_fcmp_eq(f32* fn,f32* fm)	{ return *fn == *fm ? 1:0; }
 
+#if 0
 void r_fsca(f32* fn,u32 pi_index)
 {
 	__asm__ volatile (
@@ -731,6 +732,34 @@ void r_fmac(f32* fn,f32* f0,f32* fm)
 		);
 	//*fn =*fn+*f0* *fm;
 }
+#else
+void r_fsca(f32* fn,u32 pi_index)
+{
+	fn[0]== sinf(pi_index * 3.14159265358979323846f / 32768.0f);
+	fn[1]== cosf(pi_index * 3.14159265358979323846f / 32768.0f);
+}
+
+void r_fsrra(f32* fn)
+{
+	*fn = 1.0f / sqrtf(*fn);
+}
+
+void r_fipr(f32* fn,f32* fm)
+{
+	fn[3] = fn[0]*fm[0] + fn[1]*fm[1] + fn[2]*fm[2] + fn[3]*fm[3];
+}
+
+void r_fsqrt(f32* fn)
+{
+	*fn = sqrtf(*fn);
+}
+
+//rs1+rs2*rs3
+void r_fmac(f32* fn,f32* f0,f32* fm)
+{
+	*fn = *fn + *f0 * *fm;
+}
+#endif
 
 int r_f2i_t(f32* fn)
 {
@@ -745,6 +774,7 @@ void r_i2f_n(f32* dst,int src)
 	*dst=src;
 }
 
+#if 0
 void r_ftrv(f32* fn,f32* mtrx)
 {
 	__asm__ 
@@ -763,6 +793,21 @@ void r_ftrv(f32* fn,f32* mtrx)
 	: "m"(*mtrx),"m"(*(mtrx+4)),"m"(*(mtrx+8)),"m"(*(mtrx+12)), "m"(*fn)
 		);
 }
+#else
+void r_ftrv(f32* fn,f32* mtrx)
+{
+	f32 tmp[4];
+	tmp[0] = fn[0];
+	tmp[1] = fn[1];
+	tmp[2] = fn[2];
+	tmp[3] = fn[3];
+
+	fn[0] = mtrx[0]*tmp[0] + mtrx[4]*tmp[1] + mtrx[8]*tmp[2] + mtrx[12]*tmp[3];
+	fn[1] = mtrx[1]*tmp[0] + mtrx[5]*tmp[1] + mtrx[9]*tmp[2] + mtrx[13]*tmp[3];
+	fn[2] = mtrx[2]*tmp[0] + mtrx[6]*tmp[1] + mtrx[10]*tmp[2] + mtrx[14]*tmp[3];
+	fn[3] = mtrx[3]*tmp[0] + mtrx[7]*tmp[1] + mtrx[11]*tmp[2] + mtrx[15]*tmp[3];
+}
+#endif
 
 void FASTCALL do_sqw_mmu(u32 dst);
 void FASTCALL do_sqw_nommu(u32 dst);
@@ -774,8 +819,11 @@ void ngen_CC_Finish(shil_opcode* op) { die("Unsuported for psp.."); }
 
 DynarecCodeEntry* ngen_Compile(DecodedBlock* block,bool force_checks)
 {
-	if (emit_FreeSpace()<16*1024)
+	// printf("compile: %08X %d\n",block->start, emit_FreeSpace());
+	if (emit_FreeSpace()<16*1024) {
+		printf("jit: out of space\n");
 		return 0;
+	}
 	
 	DynarecCodeEntry* rv=(DynarecCodeEntry*)emit_GetCCPtr();
 	
@@ -784,6 +832,7 @@ DynarecCodeEntry* ngen_Compile(DecodedBlock* block,bool force_checks)
 	for (size_t i=0;i<block->oplist.size();i++)
 	{
 		shil_opcode* op=&block->oplist[i];
+		// printf("op: %d\n",op->op);
 		switch(op->op)
 		{
 		case shop_ifb:

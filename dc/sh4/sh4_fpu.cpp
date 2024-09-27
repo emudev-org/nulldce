@@ -486,7 +486,7 @@ sh4op(i1111_nnn0_1111_1101)
 			"sv.s	S001, %1\n"
 		: "=m" ( *fo ),"=m" ( *(fo+1) ) : "r" ( pi_index ) );
 #else
-	#ifdef NATIVE_FSCA
+	#if 1 //defined(NATIVE_FSCA)
 			float rads=pi_index/(65536.0f/2)*pi;
 
 			fr[n + 0] = sinf(rads);

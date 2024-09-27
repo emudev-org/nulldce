@@ -206,7 +206,6 @@
 
 #ifdef _PS2
 #define HOST_OS OS_PS2
-#define USE_INTERP
 #endif
 
 #endif // HOST_OS

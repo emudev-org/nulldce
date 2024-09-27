@@ -40,6 +40,7 @@ OBJS = \
  ../dc/sh4/rec_v2/blockmanager.o \
  ../dc/sh4/rec_v2/driver.o \
  ../dc/sh4/rec_v2/decoder.o \
+ ../dc/sh4/rec_v2/shil.o \
  ../nullDC.o \
  ../plugins/plugin_manager.o \
  ../plugins/plugin_types.o \
@@ -74,7 +75,7 @@ EE_CXXFLAGS = $(EE_CFLAGS) -fno-exceptions -fno-rtti -D _PS2 -D _MIPS -w
 EE_ASFLAGS = -c -x assembler-with-cpp
 
 EE_BIN = nullDC.elf
-EE_OBJS = main.o
+EE_OBJS = main.o dc/sh4/rec_v2/ps2_driver.o
 EE_OBJS += $(OBJS)
 EE_LIBS = -flto -Wl,--gc-sections -lm -lc -lstdc++ -ldraw -lgraph -lpacket -ldma -lpad
 

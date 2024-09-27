@@ -770,7 +770,7 @@ DynarecCodeEntry* ngen_CompileBlock(DecodedBlock* block)
             }
 
             MOV32(r0, (u32)op->rs3._imm);
-            CALL((u32)(OpPtr[op->rs3._imm]));
+            CALL((u32)(OpDesc[op->rs3._imm]->oph));
             break;
         }
 

@@ -194,8 +194,8 @@ int main(int argc, wchar* argv[])
 
 int os_GetFile(char *szFileName, char *szParse,u32 flags)
 {
-	// strcpy(szFileName, "/Users/skmp/projects/nullDCe/ps2/boot.gdi");
-	return 0;
+	strcpy(szFileName, "boot.cdi");
+	return 1;
 }
 
 int os_msgbox(const wchar* text,unsigned int type)

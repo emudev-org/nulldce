@@ -8,7 +8,7 @@
 #include "dc/sh4/rec_v2/shil.h"
 
 
-OpCallFP* OpPtr[0x10000];
+// OpCallFP* OpPtr[0x10000];
 sh4_opcodelistentry* OpDesc[0x10000];
 
 //XR_N,XR_M,FR_M,FR_N,GPR_N,GPR_M,EREAD,EWRITE
@@ -125,7 +125,7 @@ sh4_opcodelistentry opcodes[]=
 	{dec_i0000_0000_0000_1001	,i0000_nnnn_1010_0011	,Mask_n		,0x00A3	,Normal				,"ocbp @<REG_N>"						,1,2,MA,fix_none},	//ocbp @<REG_N>
 	{dec_i0000_0000_0000_1001	,i0000_nnnn_1011_0011	,Mask_n		,0x00B3	,Normal				,"ocbwb @<REG_N>"						,1,2,MA,fix_none},	//ocbwb @<REG_N>
 	{0							,i0000_nnnn_1000_0011	,Mask_n		,0x0083	,Normal				,"pref @<REG_N>"						,1,2,LS,fix_none	,dec_Fill(DM_UnaryOp,PRM_RN,PRM_ONE,shop_pref,1)},	//pref @<REG_N>
-	{0							,i0000_nnnn_mmmm_0111	,Mask_n_m	,0x0007	,Normal				,"mul.l <REG_M>,<REG_N>"				,2,4,CO,fix_none	,dec_mul(-32)},	//mul.l <REG_M>,<REG_N>
+	{0							,i0000_nnnn_mmmm_0111	,Mask_n_m	,0x0007	,Normal				,"mul.l <REG_M>,<REG_N>"				,2,4,CO,fix_none	/*,dec_mul(-32)*/},	//mul.l <REG_M>,<REG_N>
 	{0							,i0000_0000_0010_1000	,Mask_none	,0x0028	,Normal				,"clrmac"								,1,3,LS,fix_none},	//clrmac
 	{0							,i0000_0000_0100_1000	,Mask_none	,0x0048	,Normal				,"clrs"									,1,1,CO,fix_none	,dec_Fill(DM_BinaryOp,PRM_SR_STATUS,PRM_TWO_INV,shop_and)},	//clrs
 	{0							,i0000_0000_0000_1000	,Mask_none	,0x0008	,Normal				,"clrt"									,1,1,MT,fix_none	,dec_Fill(DM_UnaryOp,PRM_SR_T,PRM_ZERO,shop_mov32)},	//clrt
@@ -152,20 +152,20 @@ sh4_opcodelistentry opcodes[]=
 	{0							,i0010_nnnn_mmmm_1011	,Mask_n_m	,0x200B	,Normal				,"or <REG_M>,<REG_N>"					,1,1,EX,fix_none	,dec_Bin_rNrM(shop_or)},	//or <REG_M>,<REG_N>
 	{0							,i0010_nnnn_mmmm_1100	,Mask_n_m	,0x200C	,Normal				,"cmp/str <REG_M>,<REG_N>"				,1,1,MT,fix_none},	//cmp/str <REG_M>,<REG_N>
 	{0							,i0010_nnnn_mmmm_1101	,Mask_n_m	,0x200D	,Normal				,"xtrct <REG_M>,<REG_N>"				,1,1,EX,fix_none},	//xtrct <REG_M>,<REG_N>
-	{0							,i0010_nnnn_mmmm_1110	,Mask_n_m	,0x200E	,Normal				,"mulu.w <REG_M>,<REG_N>"				,1,4,CO,fix_none	,dec_mul(16)},	//mulu.w <REG_M>,<REG_N>
-	{0							,i0010_nnnn_mmmm_1111	,Mask_n_m	,0x200F	,Normal				,"muls.w <REG_M>,<REG_N>"				,1,4,CO,fix_none	,dec_mul(-16)},	//muls.w <REG_M>,<REG_N>
+	{0							,i0010_nnnn_mmmm_1110	,Mask_n_m	,0x200E	,Normal				,"mulu.w <REG_M>,<REG_N>"				,1,4,CO,fix_none	/*,dec_mul(16)*/},	//mulu.w <REG_M>,<REG_N>
+	{0							,i0010_nnnn_mmmm_1111	,Mask_n_m	,0x200F	,Normal				,"muls.w <REG_M>,<REG_N>"				,1,4,CO,fix_none	/*,dec_mul(-16)*/},	//muls.w <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_0000	,Mask_n_m	,0x3000	,Normal				,"cmp/eq <REG_M>,<REG_N>"				,1,1,MT,fix_none	,dec_cmp(shop_seteq,PRM_RN,PRM_RM)},	// cmp/eq <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_0010	,Mask_n_m	,0x3002	,Normal				,"cmp/hs <REG_M>,<REG_N>"				,1,1,MT,fix_none	,dec_cmp(shop_setae,PRM_RN,PRM_RM)},	// cmp/hs <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_0011	,Mask_n_m	,0x3003	,Normal				,"cmp/ge <REG_M>,<REG_N>"				,1,1,MT,fix_none	,dec_cmp(shop_setge,PRM_RN,PRM_RM)},	//cmp/ge <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_0100	,Mask_n_m	,0x3004	,Normal				,"div1 <REG_M>,<REG_N>"					,1,1,EX,fix_none},	//div1 <REG_M>,<REG_N>
-	{0							,i0011_nnnn_mmmm_0101	,Mask_n_m	,0x3005	,Normal				,"dmulu.l <REG_M>,<REG_N>"				,2,4,CO,fix_none	,dec_mul(64)},	//dmulu.l <REG_M>,<REG_N>
+	{0							,i0011_nnnn_mmmm_0101	,Mask_n_m	,0x3005	,Normal				,"dmulu.l <REG_M>,<REG_N>"				,2,4,CO,fix_none	/*,dec_mul(64)*/},	//dmulu.l <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_0110	,Mask_n_m	,0x3006	,Normal				,"cmp/hi <REG_M>,<REG_N>"				,1,1,MT,fix_none	,dec_cmp(shop_setab,PRM_RN,PRM_RM)},	// cmp/hi <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_0111	,Mask_n_m	,0x3007	,Normal				,"cmp/gt <REG_M>,<REG_N>"				,1,1,MT,fix_none	,dec_cmp(shop_setgt,PRM_RN,PRM_RM)},	//cmp/gt <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_1000	,Mask_n_m	,0x3008	,Normal				,"sub <REG_M>,<REG_N>"					,1,1,EX,fix_none	,dec_Bin_rNrM(shop_sub)},	// sub <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_1010	,Mask_n_m	,0x300A	,Normal				,"subc <REG_M>,<REG_N>"					,1,1,EX,fix_none},	//subc <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_1011	,Mask_n_m	,0x300B	,Normal				,"subv <REG_M>,<REG_N>"					,1,1,EX,fix_none},	//subv <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_1100	,Mask_n_m	,0x300C	,Normal				,"add <REG_M>,<REG_N>"					,1,1,EX,fix_none	,dec_Bin_rNrM(shop_add)},	//add <REG_M>,<REG_N>
-	{0							,i0011_nnnn_mmmm_1101	,Mask_n_m	,0x300D	,Normal				,"dmuls.l <REG_M>,<REG_N>"				,1,4,CO,fix_none	,dec_mul(-64)},	//dmuls.l <REG_M>,<REG_N>
+	{0							,i0011_nnnn_mmmm_1101	,Mask_n_m	,0x300D	,Normal				,"dmuls.l <REG_M>,<REG_N>"				,1,4,CO,fix_none	/*,dec_mul(-64)*/},	//dmuls.l <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_1110	,Mask_n_m	,0x300E	,Normal				,"addc <REG_M>,<REG_N>"					,1,1,EX,fix_none},	//addc <REG_M>,<REG_N>
 	{0							,i0011_nnnn_mmmm_1111	,Mask_n_m	,0x300F	,Normal				,"addv <REG_M>,<REG_N>"					,1,1,EX,fix_none},	// addv <REG_M>,<REG_N>
 
@@ -386,7 +386,7 @@ void BuildOpcodeTables()
 
 	for (int i=0;i<0x10000;i++)
 	{
-		OpPtr[i]=iNotImplemented;
+		// OpPtr[i]=iNotImplemented;
 		OpDesc[i]=&missing_opcode;
 	}
 
@@ -444,7 +444,7 @@ void BuildOpcodeTables()
 		{
 			u32 idx=((i<<shft)&mask)+base;
 
-			OpPtr[idx]=opcodes[i2].oph;
+			// OpPtr[idx]=opcodes[i2].oph;
 
 			OpDesc[idx]=&opcodes[i2];
 		}

@@ -6,7 +6,7 @@
 //class BasicBlock;
 //typedef void (FASTCALL RecOpCallFP) (u32 op,u32 pc,BasicBlock* bb);
 
-extern OpCallFP* OpPtr[0x10000];
+// extern OpCallFP* OpPtr[0x10000];
 
 typedef void OpDissasmFP(char* out,const char* const FormatString,u32 pc,u16 opcode);
 
@@ -76,7 +76,7 @@ struct sh4_opcodelistentry
 
 extern sh4_opcodelistentry* OpDesc[0x10000];
 extern sh4_opcodelistentry opcodes[];
-#define ExecuteOpcode(op) {OpPtr[op](op);}
+#define ExecuteOpcode(op) {OpDesc[op]->oph(op);}
 
 void BuildOpcodeTables();
 void DissasembleOpcode(u16 opcode,u32 pc,char* Dissasm);

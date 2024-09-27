@@ -43,7 +43,7 @@ void Sh4_int_Run()
 			u32 op=ReadMem16(next_pc);
 			next_pc+=2;
 
-			OpPtr[op](op);
+			OpDesc[op]->oph(op);
 			l-=CPU_RATIO;
 		} while(l>0);
 		l+=SH4_TIMESLICE;
@@ -117,8 +117,8 @@ void Sh4_int_Reset(bool Manual)
 	}
 }
 
-f32 sin_table[0x10000+0x4000];	//+0x4000 to avoid having to warp around twice on cos
-
+// f32 sin_table[0x10000+0x4000];	//+0x4000 to avoid having to warp around twice on cos
+#if 0
 void GenerateSinCos()
 {
 	printf("Generating sincos tables ...\n");
@@ -147,10 +147,13 @@ void GenerateSinCos()
 		sin_table[i]=sin_table[i&0xFFFF];//warp around for the last 0x4000 entries
 	}
 }
+#endif
 void Sh4_int_Init()
 {
 	BuildOpcodeTables();
+	#if 0
 	GenerateSinCos();
+	#endif
 }
 
 void Sh4_int_Term()
