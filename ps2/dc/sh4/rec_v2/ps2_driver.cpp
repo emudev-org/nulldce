@@ -34,7 +34,7 @@ void make_address_range_executable(u32 address_start, u32 address_end)
 #define CALLEESAVED_REGISTERS REGISTER_BIT1(host_s8)|REGISTER_BIT8(host_s7, host_s6, host_s5, host_s4, host_s3, host_s2, host_s1, host_s0)
 #define CALLERSAVED_REGISTERS REGISTER_BIT2(host_t9, host_t8)|REGISTER_BIT4(host_t7, host_t6, host_t5, host_t4)
 
-#define OREGS_NUM (9 /*s0-s8 */ /* + 6 t4-t9 */)
+#define OREGS_NUM (8 /*s0-s8 */ /* + 6 t4-t9 */)
 
 #define NGPR_NUM 32
 
@@ -42,15 +42,15 @@ void make_address_range_executable(u32 address_start, u32 address_end)
 #define NREG_REMAP   2
 #define NREG_LOCK    4
 
-#define OREGS_NUM (9/*+6*/)
+#define OREGS_NUM (8/*+6*/)
 
 u8 oregs[OREGS_NUM] =
 {
-#define SAFE_NREGS 0
+// #define SAFE_NREGS 0
 	// those registers are saved-callee, so there is no need to spill them before calling a C function
-	psp_s0, psp_s1, psp_s2, psp_s3, psp_s4, psp_s5, psp_s6, psp_s7, psp_s8,
+	psp_s0, psp_s1, psp_s2, psp_s3, psp_s4, psp_s5, psp_s6, /*psp_s7,*/ psp_s8,
 
-#define TEMP_NREGS 8
+// #define TEMP_NREGS 8
 	// those registers are saved-caller, so you need to spill them before calling a C function
 	//psp_t4, psp_t5, psp_t6, psp_t7, psp_t8, psp_t9
 };
@@ -113,8 +113,7 @@ u32* GetRegPtr(u32 reg)
 	a0 - next pc
 */
 const psp_gpr_t psp_ctx_reg = psp_gp;
-const psp_gpr_t psp_cycle_reg = psp_s0;
-const psp_gpr_t psp_bRun_reg = psp_s2;
+const psp_gpr_t psp_cycle_reg = psp_s7;
 const psp_gpr_t psp_next_pc_reg = psp_a0;
 
 #include <stdarg.h>
@@ -124,7 +123,7 @@ void emit_mpush(u32 n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
-	emit_addiu(psp_sp, psp_sp, u16(-4*n));
+	emit_addiu(psp_sp, psp_sp, u16(-8*n));
 	while (n--)
 	{
 		u32 reg = va_arg(ap, u32);
@@ -134,7 +133,7 @@ void emit_mpush(u32 n, ...)
 		else
 			emit_swc1(reg-reg_fpr,psp_sp,u16(4*n));
 #else
-		emit_sw(reg,psp_sp,u16(4*n));
+		emit_sq(reg,psp_sp,u16(8*n));
 #endif
 	}
 	va_end(ap);
@@ -153,11 +152,11 @@ void emit_mpop(u32 n, ...)
         else
             emit_lwc1(reg-reg_fpr,psp_sp,u16(4*i));
 #else
-        emit_lw(reg,psp_sp,u16(4*i));
+        emit_lw(reg,psp_sp,u16(8*i));
 #endif
     }
     va_end(ap);
-    emit_addiu(psp_sp, psp_sp, u16(+4*n));
+    emit_addiu(psp_sp, psp_sp, u16(+8*n));
 }
 //2 opcodes
 void emit_li(u32 reg,u32 data,u32 sz=0)
@@ -950,13 +949,16 @@ DynarecCodeEntry* ngen_Compile(DecodedBlock* block,bool force_checks)
 							if (!fuct) fuct=(void*)ReadMem8;
 							emit_jal(fuct);
 							emit_Write32(delay);	//dslot
-							emit_seb(psp_v0,psp_v0);
+							emit_sll(psp_v0, psp_v0, 24);
+							emit_sra(psp_v0, psp_v0, 24);
 							break;
 						case 2:
 							if (!fuct) fuct=(void*)ReadMem16;
 							emit_jal(fuct);
 							emit_Write32(delay);	//dslot
-							emit_seh(psp_v0,psp_v0);
+							emit_sll(psp_v0, psp_v0, 16);
+							emit_sra(psp_v0, psp_v0, 16);
+							//emit_seh(psp_v0,psp_v0);
 							break;
 						case 4:
 							if (!fuct) fuct=(void*)ReadMem32;
@@ -1536,10 +1538,14 @@ DynarecCodeEntry* ngen_Compile(DecodedBlock* block,bool force_checks)
 
 				emit_sh_load(psp_a0,op->rs1);
 				
-				if (op->op==shop_ext_s8)
-					emit_seb(psp_a0,psp_a0);
-				else
-					emit_seh(psp_a0,psp_a0);
+				if (op->op==shop_ext_s8) {
+					emit_sll(psp_a0, psp_a0, 24);
+					emit_sra(psp_a0, psp_a0, 24);
+				}
+				else {
+					emit_sll(psp_a0, psp_a0, 16);
+					emit_sra(psp_a0, psp_a0, 16);
+				}
 				
 				emit_sh_store(psp_a0,op->rd);
 			}

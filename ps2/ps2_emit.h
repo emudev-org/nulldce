@@ -444,8 +444,8 @@ typedef enum /* OPCODE list */
 	psp_vfpu0    = 0x18,
 	psp_vfpu1    = 0x19,
 	psp_vfpu3    = 0x1b,
-	psp_special2 = 0x1c,
-	psp_special3 = 0x1f,
+	psp_lq       = 0x1e,
+	psp_sq       = 0x1f,
 	psp_lb       = 0x20,
 	psp_lh       = 0x21,
 	psp_lwl      = 0x22,
@@ -844,6 +844,7 @@ void emit_insn(psp_insn_t insn);
 #define emit_bltzal(_rs, _offset) emit_regimm(bltzal, _rs,psp_relative_target(_offset))
 #define emit_bgezal(_rs, _offset) emit_regimm(bltzal, _rs, psp_relative_target(_offset))
 //  | (lb|lh/|lw|lbu|lhu|lwl|lwr) rt, immediate(rs)
+#define emit_lq(_rt, _rs, _offset) emit_imm(lq, _rs, _rt, _offset)
 #define emit_lb(_rt, _rs, _offset) emit_imm(lb, _rs, _rt, _offset)
 #define emit_lbu(_rt, _rs, _offset) emit_imm(lbu, _rs, _rt, _offset)
 #define emit_lh(_rt, _rs, _offset) emit_imm(lh, _rs, _rt, _offset)
@@ -853,6 +854,7 @@ void emit_insn(psp_insn_t insn);
 #define emit_lwr(_rt, _rs, _offset) emit_imm(lwr, _rs, _rt, _offset)
 #define emit_lwc1(_ft, _rs, _offset) emit_imm(lwc1, _rs, _ft, _offset)
 //  | (sb|sh|sw|swl|swr) rt, immediate(rs)
+#define emit_sq(_rt, _rs, _offset) emit_imm(sq, _rs, _rt, _offset)
 #define emit_sb(_rt, _rs, _offset) emit_imm(sb, _rs, _rt, _offset)
 #define emit_sh(_rt, _rs, _offset) emit_imm(sh, _rs, _rt, _offset)
 #define emit_sw(_rt, _rs, _offset) emit_imm(sw, _rs, _rt, _offset)
